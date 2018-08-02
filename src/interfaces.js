@@ -1,6 +1,15 @@
 // @flow
 
-export type Verb = "PUSH" | "PULL" | "OPEN" | "CLOSE";
+export type Verb =
+  | "PUSH"
+  | "PULL"
+  | "OPEN"
+  | "CLOSE"
+  | "GIVE"
+  | "PICK_UP"
+  | "TALK_TO"
+  | "LOOK_AT"
+  | "USE";
 
 export interface Room {
   id: string;
@@ -11,6 +20,8 @@ export interface Room {
 export interface Actor {
   id: string;
   name: string;
+  inventory: Item[];
+  do: (verb: Verb) => void;
 }
 
 export interface Item {
