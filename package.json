@@ -1,0 +1,26 @@
+{
+  "name": "adventurejs",
+  "version": "1.0.0",
+  "description": "JavaScript adventure game engine broadly inspired by SCUMM.",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src/ -d lib/",
+    "prepublish": "yarn run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikedotJS/adventurejs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mikedotJS/adventurejs/issues"
+  },
+  "homepage": "https://github.com/mikedotJS/adventurejs#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-flow": "^6.23.0",
+    "flow-bin": "^0.77.0"
+  }
+}
