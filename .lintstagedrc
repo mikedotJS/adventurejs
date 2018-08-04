@@ -1,0 +1,6 @@
+{
+  "*.{js,json,css,md}": [
+    "yarn run prettier",
+    "git add"
+  ]
+}
