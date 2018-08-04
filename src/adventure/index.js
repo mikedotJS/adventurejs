@@ -2,48 +2,39 @@
 
 import type { IRoom } from "../room/interface";
 
-import type { IAdventure } from "./interface";
+export class Adventure {
+  static width: number;
+  static height: number;
 
-interface IAdventureOptions {
-  width: number;
-  height: number;
-  rooms: IRoom[];
-}
+  static canvas: HTMLCanvasElement;
+  static context: CanvasRenderingContext2D;
 
-export class Adventure implements IAdventure {
-  width: number;
-  height: number;
-  canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
+  static rooms: Map<string, IRoom>;
 
-  rooms: Map<string, IRoom>;
-
-  constructor(options: IAdventureOptions) {
-    this.width = options.width;
-    this.height = options.height;
-    this.rooms = new Map();
-
-    options.rooms.forEach(room => this.registerRoom(room));
-  }
-
-  registerRoom(room: IRoom): void {
-    this.rooms.set(room.id, room);
-  }
-
-  init(): void {
-    Adventure.removeCanvas();
-
-    this.canvas = document.createElement("canvas");
-    this.context = this.canvas.getContext("2d");
-
-    this.canvas.width = this.width;
-    this.canvas.height = this.height;
-
-    if (document.body) {
-      document.body.insertBefore(this.canvas, document.body.firstChild);
+  static registerRooms(rooms: IRoom[]): void {
+    if (!Adventure.rooms) {
+      Adventure.rooms = new Map();
     }
 
-    this.canvas.style.backgroundColor = "black";
+    rooms.forEach(room => {
+      Adventure.rooms.set(room.id, room);
+    });
+  }
+
+  static init(): void {
+    Adventure.removeCanvas();
+
+    Adventure.canvas = document.createElement("canvas");
+    Adventure.context = Adventure.canvas.getContext("2d");
+
+    Adventure.canvas.width = Adventure.width || 640;
+    Adventure.canvas.height = Adventure.height || 480;
+
+    if (document.body) {
+      document.body.insertBefore(Adventure.canvas, document.body.firstChild);
+    }
+
+    Adventure.canvas.style.backgroundColor = "black";
   }
 
   static removeCanvas(): void {
