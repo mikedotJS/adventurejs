@@ -14,7 +14,10 @@ export type Verb =
 export interface Room {
   id: string;
   name: string;
-  items: Item[];
+  items: Map<string, Item>;
+  actors: Map<string, Actor>;
+  currentActor: Actor;
+  currentVerb: Verb;
 }
 
 export interface Actor {
@@ -22,10 +25,13 @@ export interface Actor {
   name: string;
   inventory: Item[];
   do: (verb: Verb) => void;
+  moveTo: (x: number, y: number) => void;
+  say: (text: string) => void;
 }
 
 export interface Item {
   id: string;
   name: string;
   verbs: Map<Verb, () => void>;
+  inventoryImage: string;
 }
