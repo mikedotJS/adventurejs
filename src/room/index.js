@@ -6,6 +6,7 @@ import type { IItem } from "../item/interface";
 import type { IRoom, IRoomOptions } from "./interface";
 
 import { Adventure } from "../adventure";
+import { Renderer } from "../renderer";
 
 export class Room implements IRoom {
   id: string;
@@ -64,7 +65,7 @@ export class Room implements IRoom {
 
   draw(): void {
     if (this.backgroundImageReady) {
-      Adventure.context.drawImage(
+      Renderer.context.drawImage(
         this.backgroundImage,
         0,
         0,
