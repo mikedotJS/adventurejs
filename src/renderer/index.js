@@ -1,6 +1,7 @@
 // @flow
 
 import { Adventure } from "../adventure";
+import { Debugger } from "../debugger";
 
 export class Renderer {
   static canvas: HTMLCanvasElement;
@@ -8,8 +9,6 @@ export class Renderer {
 
   static fps: number;
   static mainLoopId: IntervalID;
-  static lastRenderAt: number;
-  static currentFps: number;
 
   static init(): void {
     Renderer.clear();
@@ -24,10 +23,9 @@ export class Renderer {
       document.body.insertBefore(Renderer.canvas, document.body.firstChild);
     }
 
-    Renderer.canvas.style.backgroundColor = "black";
-
     Renderer.fps = Adventure.fps || 60;
     Renderer.mainLoopId = Renderer.start();
+
     Renderer.listenKeyboard();
   }
 
@@ -45,13 +43,15 @@ export class Renderer {
 
   static start(): IntervalID {
     return setInterval(() => {
+      Renderer.context.clearRect(0, 0, Adventure.width, Adventure.height);
+
       if (Adventure.currentRoom) {
         Adventure.currentRoom.draw();
       }
 
       if (Adventure.debug) {
-        Renderer.computeCurrentFps();
-        Renderer.drawDebug();
+        Debugger.update();
+        Debugger.draw();
       }
     }, 1000 / Renderer.fps);
   }
@@ -60,36 +60,20 @@ export class Renderer {
     window.addEventListener("keydown", event => {
       switch (event.keyCode) {
         case 114: // F3
-          Adventure.debug = !Adventure.debug;
+          Debugger.toggle();
+          break;
+        case 115: // F4
+          Debugger.toggleWalkableArea();
+          break;
+        case 116: // F5
+          Debugger.dumpManuallyAddedPoints();
+          break;
+        case 117: // F6
+          Debugger.clearManuallyAddedPoints();
           break;
         default:
           break;
       }
-    });
-  }
-
-  static computeCurrentFps() {
-    const currentRenderAt = Date.now();
-    Renderer.currentFps = 1000 / (currentRenderAt - Renderer.lastRenderAt);
-    Renderer.lastRenderAt = currentRenderAt;
-  }
-
-  static drawDebug(): void {
-    Renderer.context.fillStyle = "white";
-    Renderer.context.font = "16px Arial";
-
-    let y = 0;
-    const lines = [
-      "Debug info:",
-      `Current room: ${
-        Adventure.currentRoom ? Adventure.currentRoom.id : "not defined"
-      }`,
-      `FPS: ${Math.round(Renderer.currentFps)}`
-    ];
-
-    lines.forEach(line => {
-      y += 20;
-      Renderer.context.fillText(`${line}\n`, 5, y, Adventure.width);
     });
   }
 }

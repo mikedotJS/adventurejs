@@ -4,6 +4,7 @@ import type { IActor } from "../actor/interface";
 import type { IVerb } from "../verb/interface";
 import type { IItem } from "../item/interface";
 import type { IRoom, IRoomOptions } from "./interface";
+import type { IPoint } from "../point/interface";
 
 import { Adventure } from "../adventure";
 import { Renderer } from "../renderer";
@@ -16,6 +17,7 @@ export class Room implements IRoom {
   actors: Map<string, IActor>;
   currentActor: IActor;
   currentVerb: IVerb;
+  walkableArea: IPoint[];
 
   backgroundImage: HTMLImageElement;
   backgroundImageReady: boolean;
@@ -27,6 +29,7 @@ export class Room implements IRoom {
     this.items = new Map();
     this.actors = new Map();
     this.currentVerb = options.currentVerb;
+    this.walkableArea = options.walkableArea;
 
     options.items.forEach(item => this.registerItem(item));
     options.actors.forEach(actor => this.registerActor(actor));
