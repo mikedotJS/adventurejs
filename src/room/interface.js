@@ -24,5 +24,7 @@ export interface IRoom {
 
   registerItem(item: IItem): void;
   registerActor(actor: IActor): void;
-  open(): void;
+
+  init(): void;
+  draw(): void;
 }

@@ -16,6 +16,9 @@ export class Room implements IRoom {
   currentActor: IActor;
   currentVerb: IVerb;
 
+  backgroundImage: HTMLImageElement;
+  backgroundImageReady: boolean;
+
   constructor(options: IRoomOptions) {
     this.id = options.id;
     this.name = options.name;
@@ -48,19 +51,26 @@ export class Room implements IRoom {
     this.actors.set(actor.id, actor);
   }
 
-  open(): void {
-    const background = new Image();
+  init(): void {
+    this.backgroundImage = new Image();
+    this.backgroundImageReady = false;
 
-    background.addEventListener("load", () => {
+    this.backgroundImage.addEventListener("load", () => {
+      this.backgroundImageReady = true;
+    });
+
+    this.backgroundImage.setAttribute("src", this.background);
+  }
+
+  draw(): void {
+    if (this.backgroundImageReady) {
       Adventure.context.drawImage(
-        background,
+        this.backgroundImage,
         0,
         0,
         Adventure.width,
         Adventure.height
       );
-    });
-
-    background.setAttribute("src", this.background);
+    }
   }
 }
