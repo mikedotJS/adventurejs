@@ -2,6 +2,7 @@ import type { IVerb } from "../verb/interface";
 
 import type { IActor } from "../actor/interface";
 import type { IItem } from "../item/interface";
+import type { IPoint } from "../point/interface";
 
 export interface IRoomOptions {
   id: string;
@@ -11,6 +12,7 @@ export interface IRoomOptions {
   actors: IActor[];
   currentActorId: string;
   currentVerb: IVerb;
+  walkableArea: IPoint[];
 }
 
 export interface IRoom {
@@ -21,6 +23,7 @@ export interface IRoom {
   actors: Map<string, IActor>;
   currentActor: IActor;
   currentVerb: IVerb;
+  walkableArea: IPoint[];
 
   registerItem(item: IItem): void;
   registerActor(actor: IActor): void;
