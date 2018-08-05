@@ -1,23 +1,16 @@
 // @flow
 
-import type { IRoom } from "./interface";
-import type { IVerb } from "../verb/interface";
-
-import { IItem } from "../item/interface";
 import type { IActor } from "../actor/interface";
+import type { IVerb } from "../verb/interface";
+import type { IItem } from "../item/interface";
+import type { IRoom, IRoomOptions } from "./interface";
 
-interface IRoomOptions {
-  id: string;
-  name: string;
-  items: IItem[];
-  actors: IActor[];
-  currentActorId: string;
-  currentVerb: IVerb;
-}
+import { Adventure } from "../adventure";
 
 export class Room implements IRoom {
   id: string;
   name: string;
+  background: string;
   items: Map<string, IItem>;
   actors: Map<string, IActor>;
   currentActor: IActor;
@@ -26,6 +19,7 @@ export class Room implements IRoom {
   constructor(options: IRoomOptions) {
     this.id = options.id;
     this.name = options.name;
+    this.background = options.background;
     this.items = new Map();
     this.actors = new Map();
     this.currentVerb = options.currentVerb;
@@ -52,5 +46,21 @@ export class Room implements IRoom {
 
   registerActor(actor: IActor): void {
     this.actors.set(actor.id, actor);
+  }
+
+  open(): void {
+    const background = new Image();
+
+    background.addEventListener("load", () => {
+      Adventure.context.drawImage(
+        background,
+        0,
+        0,
+        Adventure.width,
+        Adventure.height
+      );
+    });
+
+    background.setAttribute("src", this.background);
   }
 }
