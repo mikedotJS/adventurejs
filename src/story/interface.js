@@ -23,3 +23,8 @@ export interface IStory {
   load(gameId: string): void;
   generateGameId(): string;
 }
+
+export interface ISave {
+  id: string;
+  gameId: string;
+}
