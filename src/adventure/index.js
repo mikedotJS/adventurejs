@@ -1,6 +1,8 @@
 // @flow
 
-import type { IRoom } from "../room/interface";
+import type { IRoom, IRoomOptions } from "../room/interface";
+
+import { Room } from "../room";
 
 export class Adventure {
   static width: number;
@@ -10,14 +12,15 @@ export class Adventure {
   static context: CanvasRenderingContext2D;
 
   static rooms: Map<string, IRoom>;
+  static currentRoom: IRoom;
 
-  static registerRooms(rooms: IRoom[]): void {
+  static registerRooms(rooms: IRoomOptions[]): void {
     if (!Adventure.rooms) {
       Adventure.rooms = new Map();
     }
 
-    rooms.forEach(room => {
-      Adventure.rooms.set(room.id, room);
+    rooms.forEach(options => {
+      Adventure.rooms.set(options.id, new Room(options));
     });
   }
 
@@ -27,8 +30,11 @@ export class Adventure {
     Adventure.canvas = document.createElement("canvas");
     Adventure.context = Adventure.canvas.getContext("2d");
 
-    Adventure.canvas.width = Adventure.width || 640;
-    Adventure.canvas.height = Adventure.height || 480;
+    Adventure.width = Adventure.width || 640;
+    Adventure.height = Adventure.height || 480;
+
+    Adventure.canvas.width = Adventure.width;
+    Adventure.canvas.height = Adventure.height;
 
     if (document.body) {
       document.body.insertBefore(Adventure.canvas, document.body.firstChild);
@@ -42,6 +48,16 @@ export class Adventure {
       Array.from(document.body.getElementsByTagName("canvas")).forEach(
         element => element.remove()
       );
+    }
+  }
+
+  static openRoom(roomId: string): void {
+    Adventure.currentRoom = Adventure.rooms.get(roomId);
+
+    if (Adventure.currentRoom) {
+      Adventure.currentRoom.open();
+    } else {
+      console.error(`Unable to open room "${roomId}": room not found.`);
     }
   }
 }
