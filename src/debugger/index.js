@@ -33,7 +33,7 @@ export class Debugger implements IDebugger {
     if (this.adventure.debug) {
       this.init();
     } else {
-      this.clear();
+      this.clear(this.renderer.canvas);
     }
   }
 
@@ -48,9 +48,7 @@ export class Debugger implements IDebugger {
     canvas.addEventListener("click", this.onClickListener);
   }
 
-  clear(): void {
-    const { canvas } = this.renderer;
-
+  clear(canvas: HTMLCanvasElement): void {
     canvas.removeEventListener("mousemove", this.onMouseMoveListener);
     canvas.removeEventListener("click", this.onClickListener);
   }
@@ -67,7 +65,7 @@ export class Debugger implements IDebugger {
     }
   }
 
-  draw(): void {
+  render(): void {
     if (this.manuallyAddedPoints) {
       this.debugArea(this.manuallyAddedPoints);
     }
@@ -122,7 +120,7 @@ export class Debugger implements IDebugger {
       `Walkable area: ${this.displayWalkableArea ? "ON" : "OFF"} (F4)`,
       `Manually added points: ${
         this.manuallyAddedPoints ? this.manuallyAddedPoints.length : 0
-      } (click to add, F5 to dump, F6 to clear)`
+      } (click to add, "d" to dump, "c" to clear)`
     ];
 
     lines.forEach(line => {

@@ -17,6 +17,7 @@ export class Renderer implements IRenderer {
 
   fps: number;
   mainLoopId: IntervalID;
+  onKeyDownListener: (event: KeyboardEvent) => void;
 
   constructor(adventure: IAdventure) {
     if (Renderer.instance) {
@@ -40,10 +41,14 @@ export class Renderer implements IRenderer {
     this.fps = adventure.fps;
     this.mainLoopId = this.start();
 
-    this.listenKeyboard();
+    this.onKeyDownListener = this.onKeyDown.bind(this);
+    window.addEventListener("keydown", this.onKeyDownListener);
   }
 
   clear(): void {
+    window.removeEventListener("keydown", this.onKeyDownListener);
+    this.debugger.clear(this.canvas);
+
     if (this.mainLoopId) {
       clearInterval(this.mainLoopId);
     }
@@ -60,34 +65,32 @@ export class Renderer implements IRenderer {
       this.context.clearRect(0, 0, this.adventure.width, this.adventure.height);
 
       if (this.adventure.currentRoom) {
-        this.adventure.currentRoom.draw();
+        this.adventure.currentRoom.render();
       }
 
       if (this.adventure.debug) {
         this.debugger.update();
-        this.debugger.draw();
+        this.debugger.render();
       }
     }, 1000 / this.fps);
   }
 
-  listenKeyboard(): void {
-    window.addEventListener("keydown", (event: KeyboardEvent) => {
-      switch (event.keyCode) {
-        case 114: // F3
-          this.debugger.toggle();
-          break;
-        case 115: // F4
-          this.debugger.toggleWalkableArea();
-          break;
-        case 116: // F5
-          this.debugger.dumpManuallyAddedPoints();
-          break;
-        case 117: // F6
-          this.debugger.clearManuallyAddedPoints();
-          break;
-        default:
-          break;
-      }
-    });
+  onKeyDown(event: KeyboardEvent): void {
+    switch (event.key) {
+      case "F3":
+        this.debugger.toggle();
+        break;
+      case "F4":
+        this.debugger.toggleWalkableArea();
+        break;
+      case "d":
+        this.debugger.dumpManuallyAddedPoints();
+        break;
+      case "c":
+        this.debugger.clearManuallyAddedPoints();
+        break;
+      default:
+        break;
+    }
   }
 }

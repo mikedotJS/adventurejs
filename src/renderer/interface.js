@@ -12,8 +12,9 @@ export interface IRenderer {
 
   fps: number;
   mainLoopId: IntervalID;
+  onKeyDownListener: (event: KeyboardEvent) => void;
 
   clear(): void;
   start(): IntervalID;
-  listenKeyboard(): void;
+  onKeyDown(event: KeyboardEvent): void;
 }
