@@ -1,15 +1,17 @@
 // @flow
 
+import type { IRoom, IRoomOptions } from "./interface";
+import type { IAdventure } from "../adventure/interface";
+import type { IRenderer } from "../renderer/interface";
 import type { IActor } from "../actor/interface";
 import type { IVerb } from "../verb/interface";
 import type { IItem } from "../item/interface";
-import type { IRoom, IRoomOptions } from "./interface";
 import type { IPoint } from "../point/interface";
 
-import { Adventure } from "../adventure";
-import { Renderer } from "../renderer";
-
 export class Room implements IRoom {
+  adventure: IAdventure;
+  renderer: IRenderer;
+
   id: string;
   name: string;
   background: string;
@@ -22,7 +24,10 @@ export class Room implements IRoom {
   backgroundImage: HTMLImageElement;
   backgroundImageReady: boolean;
 
-  constructor(options: IRoomOptions) {
+  constructor(adventure: IAdventure, options: IRoomOptions) {
+    this.adventure = adventure;
+    this.renderer = adventure.renderer;
+
     this.id = options.id;
     this.name = options.name;
     this.background = options.background;
@@ -68,12 +73,12 @@ export class Room implements IRoom {
 
   draw(): void {
     if (this.backgroundImageReady) {
-      Renderer.context.drawImage(
+      this.renderer.context.drawImage(
         this.backgroundImage,
         0,
         0,
-        Adventure.width,
-        Adventure.height
+        this.adventure.width,
+        this.adventure.height
       );
     }
   }

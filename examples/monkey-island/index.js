@@ -2,10 +2,7 @@ import { Adventure } from "../../lib";
 
 import { rooms } from "./rooms";
 
-Adventure.registerRooms(rooms);
+const adventure = new Adventure(1220, 655);
 
-Adventure.width = 1220;
-Adventure.height = 655;
-
-Adventure.init();
-Adventure.openRoom("scumm-bar");
+adventure.registerRooms(rooms);
+adventure.openRoom("scumm-bar");

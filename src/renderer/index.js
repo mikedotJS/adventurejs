@@ -1,37 +1,51 @@
 // @flow
 
-import { Adventure } from "../adventure";
+import type { IRenderer } from "./interface";
+import type { IAdventure } from "../adventure/interface";
+import type { IDebugger } from "../debugger/interface";
+
 import { Debugger } from "../debugger";
 
-export class Renderer {
-  static canvas: HTMLCanvasElement;
-  static context: CanvasRenderingContext2D;
+export class Renderer implements IRenderer {
+  static instance: IRenderer;
 
-  static fps: number;
-  static mainLoopId: IntervalID;
+  adventure: IAdventure;
+  debugger: IDebugger;
 
-  static init(): void {
-    Renderer.clear();
+  canvas: HTMLCanvasElement;
+  context: CanvasRenderingContext2D;
 
-    Renderer.canvas = document.createElement("canvas");
-    Renderer.context = Renderer.canvas.getContext("2d");
+  fps: number;
+  mainLoopId: IntervalID;
 
-    Renderer.canvas.width = Adventure.width || 640;
-    Renderer.canvas.height = Adventure.height || 480;
-
-    if (document.body) {
-      document.body.insertBefore(Renderer.canvas, document.body.firstChild);
+  constructor(adventure: IAdventure) {
+    if (Renderer.instance) {
+      Renderer.instance.clear();
     }
 
-    Renderer.fps = Adventure.fps || 60;
-    Renderer.mainLoopId = Renderer.start();
+    Renderer.instance = this;
+    this.adventure = adventure;
+    this.debugger = new Debugger(adventure);
 
-    Renderer.listenKeyboard();
+    this.canvas = document.createElement("canvas");
+    this.context = this.canvas.getContext("2d");
+
+    this.canvas.width = adventure.width;
+    this.canvas.height = adventure.height;
+
+    if (document.body) {
+      document.body.insertBefore(this.canvas, document.body.firstChild);
+    }
+
+    this.fps = adventure.fps;
+    this.mainLoopId = this.start();
+
+    this.listenKeyboard();
   }
 
-  static clear(): void {
-    if (Renderer.mainLoopId) {
-      clearInterval(Renderer.mainLoopId);
+  clear(): void {
+    if (this.mainLoopId) {
+      clearInterval(this.mainLoopId);
     }
 
     if (document.body) {
@@ -41,35 +55,35 @@ export class Renderer {
     }
   }
 
-  static start(): IntervalID {
+  start(): IntervalID {
     return setInterval(() => {
-      Renderer.context.clearRect(0, 0, Adventure.width, Adventure.height);
+      this.context.clearRect(0, 0, this.adventure.width, this.adventure.height);
 
-      if (Adventure.currentRoom) {
-        Adventure.currentRoom.draw();
+      if (this.adventure.currentRoom) {
+        this.adventure.currentRoom.draw();
       }
 
-      if (Adventure.debug) {
-        Debugger.update();
-        Debugger.draw();
+      if (this.adventure.debug) {
+        this.debugger.update();
+        this.debugger.draw();
       }
-    }, 1000 / Renderer.fps);
+    }, 1000 / this.fps);
   }
 
-  static listenKeyboard(): void {
-    window.addEventListener("keydown", event => {
+  listenKeyboard(): void {
+    window.addEventListener("keydown", (event: KeyboardEvent) => {
       switch (event.keyCode) {
         case 114: // F3
-          Debugger.toggle();
+          this.debugger.toggle();
           break;
         case 115: // F4
-          Debugger.toggleWalkableArea();
+          this.debugger.toggleWalkableArea();
           break;
         case 116: // F5
-          Debugger.dumpManuallyAddedPoints();
+          this.debugger.dumpManuallyAddedPoints();
           break;
         case 117: // F6
-          Debugger.clearManuallyAddedPoints();
+          this.debugger.clearManuallyAddedPoints();
           break;
         default:
           break;
