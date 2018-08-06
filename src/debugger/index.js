@@ -1,149 +1,170 @@
 // @flow
 
+import type { IDebugger } from "./interface";
 import type { IPoint } from "../point/interface";
+import type { IAdventure } from "../adventure/interface";
+import type { IRenderer } from "../renderer/interface";
 
-import { Adventure } from "../adventure";
-import { Renderer } from "../renderer";
 import { Point } from "../point";
 
-export class Debugger {
-  static lastRenderAt: number;
-  static currentFps: number;
+export class Debugger implements IDebugger {
+  adventure: IAdventure;
+  renderer: IRenderer;
 
-  static mouseX: number;
-  static mouseY: number;
+  lastRenderAt: number;
+  currentFps: number;
 
-  static displayWalkableArea: boolean;
-  static manuallyAddedPoints: IPoint[];
+  onMouseMoveListener: (event: MouseEvent) => void;
+  onClickListener: (event: MouseEvent) => void;
 
-  static toggle(): void {
-    Adventure.debug = !Adventure.debug;
+  mouseX: number;
+  mouseY: number;
 
-    if (Adventure.debug) {
-      Debugger.init();
+  displayWalkableArea: boolean;
+  manuallyAddedPoints: IPoint[];
+
+  constructor(adventure: IAdventure) {
+    this.adventure = adventure;
+  }
+
+  toggle(): void {
+    this.adventure.debug = !this.adventure.debug;
+
+    if (this.adventure.debug) {
+      this.init();
     } else {
-      Debugger.clear();
+      this.clear();
     }
   }
 
-  static init(): void {
-    Renderer.canvas.addEventListener("mousemove", Debugger.onMouseMove);
-    Renderer.canvas.addEventListener("click", Debugger.onClick);
+  init(): void {
+    this.renderer = this.adventure.renderer;
+    const { canvas } = this.renderer;
+
+    this.onMouseMoveListener = this.onMouseMove.bind(this);
+    this.onClickListener = this.onClick.bind(this);
+
+    canvas.addEventListener("mousemove", this.onMouseMoveListener);
+    canvas.addEventListener("click", this.onClickListener);
   }
 
-  static clear(): void {
-    Renderer.canvas.removeEventListener("mousemove", Debugger.onMouseMove);
-    Renderer.canvas.removeEventListener("click", Debugger.onClick);
+  clear(): void {
+    const { canvas } = this.renderer;
+
+    canvas.removeEventListener("mousemove", this.onMouseMoveListener);
+    canvas.removeEventListener("click", this.onClickListener);
   }
 
-  static update(): void {
+  update(): void {
     const currentRenderAt = Date.now();
-    Debugger.currentFps = 1000 / (currentRenderAt - Debugger.lastRenderAt);
-    Debugger.lastRenderAt = currentRenderAt;
+    this.currentFps = 1000 / (currentRenderAt - this.lastRenderAt);
+    this.lastRenderAt = currentRenderAt;
   }
 
-  static toggleWalkableArea() {
-    if (Adventure.debug) {
-      Debugger.displayWalkableArea = !Debugger.displayWalkableArea;
+  toggleWalkableArea(): void {
+    if (this.adventure.debug) {
+      this.displayWalkableArea = !this.displayWalkableArea;
     }
   }
 
-  static draw(): void {
-    if (Debugger.manuallyAddedPoints) {
-      Debugger.debugArea(Debugger.manuallyAddedPoints);
+  draw(): void {
+    if (this.manuallyAddedPoints) {
+      this.debugArea(this.manuallyAddedPoints);
     }
 
     if (
-      Debugger.displayWalkableArea &&
-      Adventure.currentRoom &&
-      Adventure.currentRoom.walkableArea
+      this.displayWalkableArea &&
+      this.adventure.currentRoom &&
+      this.adventure.currentRoom.walkableArea
     ) {
-      Debugger.debugArea(Adventure.currentRoom.walkableArea);
+      this.debugArea(this.adventure.currentRoom.walkableArea);
     }
 
-    Debugger.drawMessages();
+    this.drawMessages();
   }
 
-  static debugArea(points: IPoint[]) {
-    Renderer.context.beginPath();
+  debugArea(points: IPoint[]): void {
+    this.renderer.context.beginPath();
 
     points.forEach((point, index) => {
-      Debugger.drawPoint(point);
+      this.drawPoint(point);
 
       if (index === 0) {
-        Renderer.context.moveTo(point.x, point.y);
+        this.renderer.context.moveTo(point.x, point.y);
       } else {
-        Renderer.context.lineTo(point.x, point.y);
+        this.renderer.context.lineTo(point.x, point.y);
       }
     });
 
-    Renderer.context.closePath();
+    this.renderer.context.closePath();
 
-    Renderer.context.fillStyle = "rgba(255, 0, 0, 0.25)";
-    Renderer.context.fill();
-    Renderer.context.lineWidth = 1;
-    Renderer.context.strokeStyle = "red";
-    Renderer.context.stroke();
+    this.renderer.context.fillStyle = "rgba(255, 0, 0, 0.25)";
+    this.renderer.context.fill();
+    this.renderer.context.lineWidth = 1;
+    this.renderer.context.strokeStyle = "red";
+    this.renderer.context.stroke();
   }
 
-  static drawMessages(): void {
-    Renderer.context.fillStyle = "white";
-    Renderer.context.font = "16px Arial";
+  drawMessages(): void {
+    this.renderer.context.fillStyle = "white";
+    this.renderer.context.font = "16px Arial";
 
     let y = 0;
     const lines = [
       "Debug info:",
       `Current room: ${
-        Adventure.currentRoom ? Adventure.currentRoom.id : "not defined"
+        this.adventure.currentRoom
+          ? this.adventure.currentRoom.id
+          : "not defined"
       }`,
-      `FPS: ${Math.round(Debugger.currentFps)}`,
-      `Mouse position: ${Debugger.mouseX || "?"};${Debugger.mouseY || "?"}`,
-      `Walkable area: ${Debugger.displayWalkableArea ? "ON" : "OFF"} (F4)`,
+      `FPS: ${Math.round(this.currentFps)}`,
+      `Mouse position: ${this.mouseX || "?"};${this.mouseY || "?"}`,
+      `Walkable area: ${this.displayWalkableArea ? "ON" : "OFF"} (F4)`,
       `Manually added points: ${
-        Debugger.manuallyAddedPoints ? Debugger.manuallyAddedPoints.length : 0
+        this.manuallyAddedPoints ? this.manuallyAddedPoints.length : 0
       } (click to add, F5 to dump, F6 to clear)`
     ];
 
     lines.forEach(line => {
       y += 20;
-      Renderer.context.fillText(`${line}\n`, 5, y, Adventure.width);
+      this.renderer.context.fillText(`${line}\n`, 5, y, this.adventure.width);
     });
   }
 
-  static onMouseMove(event: MouseEvent): void {
-    const rect = Renderer.canvas.getBoundingClientRect();
-    Debugger.mouseX = event.clientX - rect.left;
-    Debugger.mouseY = event.clientY - rect.top;
+  onMouseMove(event: MouseEvent): void {
+    const rect = this.renderer.canvas.getBoundingClientRect();
+    this.mouseX = event.clientX - rect.left;
+    this.mouseY = event.clientY - rect.top;
   }
 
-  static onClick(event: MouseEvent): void {
-    const rect = Renderer.canvas.getBoundingClientRect();
+  onClick(event: MouseEvent): void {
+    const rect = this.renderer.canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    if (!Debugger.manuallyAddedPoints) {
-      Debugger.manuallyAddedPoints = [];
+    if (!this.manuallyAddedPoints) {
+      this.manuallyAddedPoints = [];
     }
 
-    Debugger.manuallyAddedPoints.push(new Point(x, y));
+    this.manuallyAddedPoints.push(new Point(x, y));
   }
 
-  static drawPoint(point: IPoint): void {
-    Renderer.context.arc(point.x, point.y, 2, 0, 2 * Math.PI, false);
-    Renderer.context.lineWidth = 2;
-    Renderer.context.strokeStyle = "red";
-    Renderer.context.stroke();
+  drawPoint(point: IPoint): void {
+    this.renderer.context.arc(point.x, point.y, 2, 0, 2 * Math.PI, false);
+    this.renderer.context.lineWidth = 2;
+    this.renderer.context.strokeStyle = "red";
+    this.renderer.context.stroke();
   }
 
-  static dumpManuallyAddedPoints(): void {
-    if (Adventure.debug) {
-      console.log(JSON.stringify(Debugger.manuallyAddedPoints));
+  dumpManuallyAddedPoints(): void {
+    if (this.adventure.debug) {
+      console.log(JSON.stringify(this.manuallyAddedPoints));
     }
   }
 
-  static clearManuallyAddedPoints(): void {
-    if (Adventure.debug) {
-      Debugger.manuallyAddedPoints = [];
+  clearManuallyAddedPoints(): void {
+    if (this.adventure.debug) {
+      this.manuallyAddedPoints = [];
     }
   }
 }

@@ -1,39 +1,46 @@
 // @flow
 
+import type { IAdventure } from "./interface";
 import type { IRoom, IRoomOptions } from "../room/interface";
+import type { IRenderer } from "../renderer/interface";
 
 import { Renderer } from "../renderer";
 import { Room } from "../room";
 
-export class Adventure {
-  static width: number;
-  static height: number;
+export class Adventure implements IAdventure {
+  width: number;
+  height: number;
 
-  static rooms: Map<string, IRoom>;
-  static currentRoom: IRoom;
+  rooms: Map<string, IRoom>;
+  currentRoom: IRoom;
 
-  static fps: number;
-  static debug: boolean;
+  fps: number;
+  debug: boolean;
+  renderer: IRenderer;
 
-  static registerRooms(rooms: IRoomOptions[]): void {
-    if (!Adventure.rooms) {
-      Adventure.rooms = new Map();
-    }
+  constructor(width: number = 640, height: number = 480, fps: number = 60) {
+    this.width = width;
+    this.height = height;
 
+    this.rooms = new Map();
+    this.currentRoom = null;
+
+    this.fps = fps;
+    this.debug = false;
+    this.renderer = new Renderer(this);
+  }
+
+  registerRooms(rooms: IRoomOptions[]): void {
     rooms.forEach(options => {
-      Adventure.rooms.set(options.id, new Room(options));
+      this.rooms.set(options.id, new Room(this, options));
     });
   }
 
-  static init(): void {
-    Renderer.init();
-  }
+  openRoom(roomId: string): void {
+    this.currentRoom = this.rooms.get(roomId);
 
-  static openRoom(roomId: string): void {
-    Adventure.currentRoom = Adventure.rooms.get(roomId);
-
-    if (Adventure.currentRoom) {
-      Adventure.currentRoom.init();
+    if (this.currentRoom) {
+      this.currentRoom.init();
     } else {
       console.error(`Unable to open room "${roomId}": room not found.`);
     }
