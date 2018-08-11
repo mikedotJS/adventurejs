@@ -2,6 +2,7 @@
 
 import type { IAdventure } from "../adventure/interface";
 import type { IDebugger } from "../debugger/interface";
+import type { IRenderable } from "../renderable/interface";
 
 export interface IRenderer {
   adventure: IAdventure;
@@ -12,8 +13,10 @@ export interface IRenderer {
 
   fps: number;
   mainLoopId: IntervalID;
+  onKeyDownListener: (event: KeyboardEvent) => void;
 
   clear(): void;
   start(): IntervalID;
-  listenKeyboard(): void;
+  render(renderable: IRenderable): void;
+  onKeyDown(event: KeyboardEvent): void;
 }

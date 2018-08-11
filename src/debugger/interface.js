@@ -22,10 +22,10 @@ export interface IDebugger {
 
   toggle(): void;
   init(): void;
-  clear(): void;
+  clear(canvas: HTMLCanvasElement): void;
   update(): void;
   toggleWalkableArea(): void;
-  draw(): void;
+  render(): void;
   debugArea(points: IPoint[]): void;
   drawMessages(): void;
   onMouseMove(event: MouseEvent): void;

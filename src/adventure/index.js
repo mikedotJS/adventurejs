@@ -14,7 +14,6 @@ export class Adventure implements IAdventure {
   rooms: Map<string, IRoom>;
   currentRoom: IRoom;
 
-  fps: number;
   debug: boolean;
   renderer: IRenderer;
 
@@ -25,14 +24,13 @@ export class Adventure implements IAdventure {
     this.rooms = new Map();
     this.currentRoom = null;
 
-    this.fps = fps;
     this.debug = false;
-    this.renderer = new Renderer(this);
+    this.renderer = new Renderer(this, fps);
   }
 
   registerRooms(rooms: IRoomOptions[]): void {
     rooms.forEach(options => {
-      this.rooms.set(options.id, new Room(this, options));
+      this.rooms.set(options.id, new Room(options));
     });
   }
 

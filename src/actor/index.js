@@ -1,21 +1,32 @@
 // @flow
 
 import type { IActor } from "./interface";
+import type { IRenderableOptions } from "../renderable/interface";
 import type { IVerb } from "../verb/interface";
 import type { IItem } from "../item/interface";
 
-interface IActorOptions {
+import { Renderable } from "../renderable";
+
+interface IActorOptions extends IRenderableOptions {
   id: string;
   name: string;
   inventory: IItem[];
 }
 
-export class Actor implements IActor {
+export class Actor extends Renderable implements IActor {
   id: string;
   name: string;
   inventory: Map<string, IItem>;
 
   constructor(options: IActorOptions) {
+    super({
+      x: options.x,
+      y: options.y,
+      width: options.width,
+      height: options.height,
+      imagePath: options.imagePath
+    });
+
     this.id = options.id;
     this.name = options.name;
     this.inventory = new Map();

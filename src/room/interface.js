@@ -1,14 +1,15 @@
+import type { IRenderable } from "../renderable/interface";
 import type { IVerb } from "../verb/interface";
-import type { IRenderer } from "../renderer/interface";
 import type { IActor } from "../actor/interface";
 import type { IItem } from "../item/interface";
 import type { IPoint } from "../point/interface";
-import type { IAdventure } from "../adventure/interface";
 
 export interface IRoomOptions {
   id: string;
   name: string;
-  background: string;
+  width: number;
+  height: number;
+  imagePath: string;
   items: IItem[];
   actors: IActor[];
   currentActorId: string;
@@ -16,10 +17,7 @@ export interface IRoomOptions {
   walkableArea: IPoint[];
 }
 
-export interface IRoom {
-  adventure: IAdventure;
-  renderer: IRenderer;
-
+export interface IRoom extends IRenderable {
   id: string;
   name: string;
   background: string;
@@ -31,7 +29,4 @@ export interface IRoom {
 
   registerItem(item: IItem): void;
   registerActor(actor: IActor): void;
-
-  init(): void;
-  draw(): void;
 }

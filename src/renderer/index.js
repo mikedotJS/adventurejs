@@ -3,6 +3,8 @@
 import type { IRenderer } from "./interface";
 import type { IAdventure } from "../adventure/interface";
 import type { IDebugger } from "../debugger/interface";
+import type { IRenderable } from "../renderable/interface";
+import type { IActor } from "../actor/interface";
 
 import { Debugger } from "../debugger";
 
@@ -17,8 +19,9 @@ export class Renderer implements IRenderer {
 
   fps: number;
   mainLoopId: IntervalID;
+  onKeyDownListener: (event: KeyboardEvent) => void;
 
-  constructor(adventure: IAdventure) {
+  constructor(adventure: IAdventure, fps: number) {
     if (Renderer.instance) {
       Renderer.instance.clear();
     }
@@ -37,13 +40,17 @@ export class Renderer implements IRenderer {
       document.body.insertBefore(this.canvas, document.body.firstChild);
     }
 
-    this.fps = adventure.fps;
+    this.fps = fps;
     this.mainLoopId = this.start();
 
-    this.listenKeyboard();
+    this.onKeyDownListener = this.onKeyDown.bind(this);
+    window.addEventListener("keydown", this.onKeyDownListener);
   }
 
   clear(): void {
+    window.removeEventListener("keydown", this.onKeyDownListener);
+    this.debugger.clear(this.canvas);
+
     if (this.mainLoopId) {
       clearInterval(this.mainLoopId);
     }
@@ -57,37 +64,52 @@ export class Renderer implements IRenderer {
 
   start(): IntervalID {
     return setInterval(() => {
-      this.context.clearRect(0, 0, this.adventure.width, this.adventure.height);
+      const { width, height, currentRoom, debug } = this.adventure;
+      this.context.clearRect(0, 0, width, height);
 
-      if (this.adventure.currentRoom) {
-        this.adventure.currentRoom.draw();
+      if (currentRoom) {
+        this.render(currentRoom);
+
+        currentRoom.actors.forEach((actor: IActor) => {
+          this.render(actor);
+        });
       }
 
-      if (this.adventure.debug) {
+      if (debug) {
         this.debugger.update();
-        this.debugger.draw();
+        this.debugger.render();
       }
     }, 1000 / this.fps);
   }
 
-  listenKeyboard(): void {
-    window.addEventListener("keydown", (event: KeyboardEvent) => {
-      switch (event.keyCode) {
-        case 114: // F3
-          this.debugger.toggle();
-          break;
-        case 115: // F4
-          this.debugger.toggleWalkableArea();
-          break;
-        case 116: // F5
-          this.debugger.dumpManuallyAddedPoints();
-          break;
-        case 117: // F6
-          this.debugger.clearManuallyAddedPoints();
-          break;
-        default:
-          break;
-      }
-    });
+  render(renderable: IRenderable): void {
+    if (renderable.imageReady) {
+      this.context.drawImage(
+        renderable.image,
+        renderable.x,
+        renderable.y,
+        renderable.width,
+        renderable.height
+      );
+    }
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    switch (event.key) {
+      case "F3":
+        this.debugger.toggle();
+        break;
+      case "F4":
+        this.debugger.toggleWalkableArea();
+        break;
+      case "d":
+        this.debugger.dumpManuallyAddedPoints();
+        break;
+      case "c":
+        this.debugger.clearManuallyAddedPoints();
+        break;
+      default:
+        break;
+    }
   }
 }
