@@ -1,7 +1,6 @@
 // @flow
 
 import type { IRoom, IRoomOptions } from "./interface";
-import type { IAdventure } from "../adventure/interface";
 import type { IActor, IActorOptions } from "../actor/interface";
 import type { IVerb } from "../verb/interface";
 import type { IItem } from "../item/interface";
@@ -19,12 +18,12 @@ export class Room extends Renderable implements IRoom {
   currentVerb: IVerb;
   walkableArea: IPoint[];
 
-  constructor(adventure: IAdventure, options: IRoomOptions) {
-    super(adventure, {
+  constructor(options: IRoomOptions) {
+    super({
       x: 0,
       y: 0,
-      width: adventure.width,
-      height: adventure.height,
+      width: options.width,
+      height: options.height,
       imagePath: options.imagePath
     });
 
@@ -56,7 +55,7 @@ export class Room extends Renderable implements IRoom {
   }
 
   registerActor(options: IActorOptions): void {
-    this.actors.set(options.id, new Actor(this.adventure, options));
+    this.actors.set(options.id, new Actor(options));
   }
 
   init(): void {
@@ -64,14 +63,6 @@ export class Room extends Renderable implements IRoom {
 
     this.actors.forEach(actor => {
       actor.init();
-    });
-  }
-
-  render(): void {
-    super.render();
-
-    this.actors.forEach(actor => {
-      actor.render();
     });
   }
 }

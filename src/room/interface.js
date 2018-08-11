@@ -7,6 +7,8 @@ import type { IPoint } from "../point/interface";
 export interface IRoomOptions {
   id: string;
   name: string;
+  width: number;
+  height: number;
   imagePath: string;
   items: IItem[];
   actors: IActor[];

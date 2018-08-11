@@ -10,7 +10,6 @@ export interface IAdventure {
   rooms: Map<string, IRoom>;
   currentRoom: IRoom;
 
-  fps: number;
   debug: boolean;
   renderer: IRenderer;
 

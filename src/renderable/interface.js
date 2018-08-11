@@ -1,7 +1,5 @@
 // @flow
 
-import type { IAdventure } from "../adventure/interface";
-import type { IRenderer } from "../renderer/interface";
 import type { IPoint } from "../point/interface";
 
 export interface IRenderableOptions {
@@ -15,9 +13,6 @@ export interface IRenderableOptions {
 }
 
 export interface IRenderable extends IPoint {
-  adventure: IAdventure;
-  renderer: IRenderer;
-
   width: number;
   height: number;
 
@@ -26,5 +21,4 @@ export interface IRenderable extends IPoint {
   imageReady: boolean;
 
   init(): void;
-  render(): void;
 }

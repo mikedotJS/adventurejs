@@ -3,6 +3,8 @@
 import type { IRenderer } from "./interface";
 import type { IAdventure } from "../adventure/interface";
 import type { IDebugger } from "../debugger/interface";
+import type { IRenderable } from "../renderable/interface";
+import type { IActor } from "../actor/interface";
 
 import { Debugger } from "../debugger";
 
@@ -19,7 +21,7 @@ export class Renderer implements IRenderer {
   mainLoopId: IntervalID;
   onKeyDownListener: (event: KeyboardEvent) => void;
 
-  constructor(adventure: IAdventure) {
+  constructor(adventure: IAdventure, fps: number) {
     if (Renderer.instance) {
       Renderer.instance.clear();
     }
@@ -38,7 +40,7 @@ export class Renderer implements IRenderer {
       document.body.insertBefore(this.canvas, document.body.firstChild);
     }
 
-    this.fps = adventure.fps;
+    this.fps = fps;
     this.mainLoopId = this.start();
 
     this.onKeyDownListener = this.onKeyDown.bind(this);
@@ -62,17 +64,34 @@ export class Renderer implements IRenderer {
 
   start(): IntervalID {
     return setInterval(() => {
-      this.context.clearRect(0, 0, this.adventure.width, this.adventure.height);
+      const { width, height, currentRoom, debug } = this.adventure;
+      this.context.clearRect(0, 0, width, height);
 
-      if (this.adventure.currentRoom) {
-        this.adventure.currentRoom.render();
+      if (currentRoom) {
+        this.render(currentRoom);
+
+        currentRoom.actors.forEach((actor: IActor) => {
+          this.render(actor);
+        });
       }
 
-      if (this.adventure.debug) {
+      if (debug) {
         this.debugger.update();
         this.debugger.render();
       }
     }, 1000 / this.fps);
+  }
+
+  render(renderable: IRenderable): void {
+    if (renderable.imageReady) {
+      this.context.drawImage(
+        renderable.image,
+        renderable.x,
+        renderable.y,
+        renderable.width,
+        renderable.height
+      );
+    }
   }
 
   onKeyDown(event: KeyboardEvent): void {

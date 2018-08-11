@@ -2,7 +2,6 @@
 
 import type { IActor } from "./interface";
 import type { IRenderableOptions } from "../renderable/interface";
-import type { IAdventure } from "../adventure/interface";
 import type { IVerb } from "../verb/interface";
 import type { IItem } from "../item/interface";
 
@@ -19,8 +18,8 @@ export class Actor extends Renderable implements IActor {
   name: string;
   inventory: Map<string, IItem>;
 
-  constructor(adventure: IAdventure, options: IActorOptions) {
-    super(adventure, {
+  constructor(options: IActorOptions) {
+    super({
       x: options.x,
       y: options.y,
       width: options.width,
