@@ -61,6 +61,12 @@ export class Room extends Renderable implements IRoom {
   init(): void {
     super.init();
 
+    // Sort actors by Y values
+    this.actors = new Map(
+      Array.from(this.actors.entries()).sort(([, a], [, b]) => a.y - b.y)
+    );
+
+    // Init actors
     this.actors.forEach(actor => {
       actor.init();
     });
