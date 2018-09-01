@@ -4,10 +4,14 @@ import type { IDebugger } from "./interface";
 import type { IPoint } from "../point/interface";
 import type { IAdventure } from "../adventure/interface";
 import type { IRenderer } from "../renderer/interface";
+import type { IActor } from "../actor/interface";
 
 import { Point } from "../point";
 
 export class Debugger implements IDebugger {
+  static WALKABLE_AREA_COLOR = "red";
+  static ACTOR_COLOR = "yellow";
+
   adventure: IAdventure;
   renderer: IRenderer;
 
@@ -21,6 +25,8 @@ export class Debugger implements IDebugger {
   mouseY: number;
 
   displayWalkableArea: boolean;
+  displayActorsDetails: boolean;
+
   manuallyAddedPoints: IPoint[];
 
   constructor(adventure: IAdventure) {
@@ -44,6 +50,8 @@ export class Debugger implements IDebugger {
     this.onMouseMoveListener = this.onMouseMove.bind(this);
     this.onClickListener = this.onClick.bind(this);
 
+    this.manuallyAddedPoints = [];
+
     canvas.addEventListener("mousemove", this.onMouseMoveListener);
     canvas.addEventListener("click", this.onClickListener);
   }
@@ -65,6 +73,12 @@ export class Debugger implements IDebugger {
     }
   }
 
+  toggleActorDetails(): void {
+    if (this.adventure.debug) {
+      this.displayActorsDetails = !this.displayActorsDetails;
+    }
+  }
+
   render(): void {
     if (this.manuallyAddedPoints) {
       this.debugArea(this.manuallyAddedPoints);
@@ -78,6 +92,14 @@ export class Debugger implements IDebugger {
       this.debugArea(this.adventure.currentRoom.walkableArea);
     }
 
+    if (
+      this.displayActorsDetails &&
+      this.adventure.currentRoom &&
+      this.adventure.currentRoom.actors
+    ) {
+      this.debugActors(Array.from(this.adventure.currentRoom.actors.values()));
+    }
+
     this.drawMessages();
   }
 
@@ -85,7 +107,7 @@ export class Debugger implements IDebugger {
     this.renderer.context.beginPath();
 
     points.forEach((point, index) => {
-      this.drawPoint(point);
+      this.drawPoint(point, Debugger.WALKABLE_AREA_COLOR);
 
       if (index === 0) {
         this.renderer.context.moveTo(point.x, point.y);
@@ -99,8 +121,37 @@ export class Debugger implements IDebugger {
     this.renderer.context.fillStyle = "rgba(255, 0, 0, 0.25)";
     this.renderer.context.fill();
     this.renderer.context.lineWidth = 1;
-    this.renderer.context.strokeStyle = "red";
+    this.renderer.context.strokeStyle = Debugger.WALKABLE_AREA_COLOR;
     this.renderer.context.stroke();
+  }
+
+  debugActors(actors: IActor[]) {
+    actors.forEach(actor => {
+      this.renderer.context.beginPath();
+      this.drawPoint(actor, Debugger.ACTOR_COLOR);
+      this.renderer.context.moveTo(actor.x, actor.y);
+
+      const x = actor.x - actor.scaledWidth / 2;
+      const y = actor.y - actor.scaledHeight;
+      const scale = Math.round(actor.scale * 10000) / 100;
+
+      this.renderer.context.lineWidth = 1;
+      this.renderer.context.strokeStyle = Debugger.ACTOR_COLOR;
+      this.renderer.context.rect(x, y, actor.scaledWidth, actor.scaledHeight);
+
+      this.renderer.context.stroke();
+      this.renderer.context.closePath();
+
+      this.renderer.context.fillStyle = Debugger.ACTOR_COLOR;
+      this.renderer.context.font = "16px Arial";
+
+      this.renderer.context.fillText(
+        `${actor.name} (#${actor.id}, ${scale} %)`,
+        x,
+        y - 10,
+        this.adventure.width - x
+      );
+    });
   }
 
   drawMessages(): void {
@@ -119,13 +170,14 @@ export class Debugger implements IDebugger {
       `Mouse position: ${this.mouseX || "?"};${this.mouseY || "?"}`,
       `Walkable area: ${this.displayWalkableArea ? "ON" : "OFF"} (F4)`,
       `Manually added points: ${
-        this.manuallyAddedPoints ? this.manuallyAddedPoints.length : 0
-      } (click to add, "d" to dump, "c" to clear)`
+        this.manuallyAddedPoints.length
+      } (click to add, "d" to dump, "c" to clear)`,
+      `Actors: ${this.displayActorsDetails ? "ON" : "OFF"} (F5)`
     ];
 
     lines.forEach(line => {
       y += 20;
-      this.renderer.context.fillText(`${line}\n`, 5, y, this.adventure.width);
+      this.renderer.context.fillText(line, 5, y, this.adventure.width);
     });
   }
 
@@ -140,17 +192,13 @@ export class Debugger implements IDebugger {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    if (!this.manuallyAddedPoints) {
-      this.manuallyAddedPoints = [];
-    }
-
     this.manuallyAddedPoints.push(new Point(x, y));
   }
 
-  drawPoint(point: IPoint): void {
+  drawPoint(point: IPoint, color: string): void {
     this.renderer.context.arc(point.x, point.y, 2, 0, 2 * Math.PI, false);
     this.renderer.context.lineWidth = 2;
-    this.renderer.context.strokeStyle = "red";
+    this.renderer.context.strokeStyle = color;
     this.renderer.context.stroke();
   }
 

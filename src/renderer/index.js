@@ -71,7 +71,7 @@ export class Renderer implements IRenderer {
         this.render(currentRoom);
 
         currentRoom.actors.forEach((actor: IActor) => {
-          this.render(actor);
+          this.renderActor(actor);
         });
       }
 
@@ -94,6 +94,18 @@ export class Renderer implements IRenderer {
     }
   }
 
+  renderActor(actor: IActor): void {
+    if (actor.imageReady) {
+      this.context.drawImage(
+        actor.image,
+        actor.x - actor.scaledWidth / 2,
+        actor.y - actor.scaledHeight,
+        actor.scaledWidth,
+        actor.scaledHeight
+      );
+    }
+  }
+
   onKeyDown(event: KeyboardEvent): void {
     switch (event.key) {
       case "F3":
@@ -101,6 +113,9 @@ export class Renderer implements IRenderer {
         break;
       case "F4":
         this.debugger.toggleWalkableArea();
+        break;
+      case "F5":
+        this.debugger.toggleActorDetails();
         break;
       case "d":
         this.debugger.dumpManuallyAddedPoints();

@@ -6,9 +6,6 @@ export interface IRenderableOptions {
   x: number;
   y: number;
 
-  width: number;
-  height: number;
-
   imagePath: string;
 }
 
@@ -20,5 +17,5 @@ export interface IRenderable extends IPoint {
   imagePath: string;
   imageReady: boolean;
 
-  init(): void;
+  init(): Promise<void>;
 }

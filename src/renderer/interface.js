@@ -3,6 +3,7 @@
 import type { IAdventure } from "../adventure/interface";
 import type { IDebugger } from "../debugger/interface";
 import type { IRenderable } from "../renderable/interface";
+import type { IActor } from "../actor/interface";
 
 export interface IRenderer {
   adventure: IAdventure;
@@ -18,5 +19,6 @@ export interface IRenderer {
   clear(): void;
   start(): IntervalID;
   render(renderable: IRenderable): void;
+  renderActor(actor: IActor): void;
   onKeyDown(event: KeyboardEvent): void;
 }
