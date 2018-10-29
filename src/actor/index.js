@@ -5,7 +5,7 @@ import type { IRenderableOptions } from "../renderable/interface";
 import type { IVerb } from "../verb/interface";
 import type { IItem } from "../item/interface";
 
-import { Renderable } from "../renderable";
+import { Scalable } from "../scalable";
 
 interface IActorOptions extends IRenderableOptions {
   id: string;
@@ -13,7 +13,7 @@ interface IActorOptions extends IRenderableOptions {
   inventory: IItem[];
 }
 
-export class Actor extends Renderable implements IActor {
+export class Actor extends Scalable implements IActor {
   id: string;
   name: string;
   inventory: Map<string, IItem>;
@@ -22,8 +22,6 @@ export class Actor extends Renderable implements IActor {
     super({
       x: options.x,
       y: options.y,
-      width: options.width,
-      height: options.height,
       imagePath: options.imagePath
     });
 

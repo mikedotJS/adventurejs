@@ -15,20 +15,25 @@ export class Renderable extends Point implements IRenderable {
   constructor(options: IRenderableOptions) {
     super(options.x, options.y);
 
-    this.width = options.width;
-    this.height = options.height;
-
     this.imagePath = options.imagePath;
     this.imageReady = false;
   }
 
-  init(): void {
-    this.image = new Image();
+  init(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.image = new Image();
 
-    this.image.addEventListener("load", () => {
-      this.imageReady = true;
+      this.image.addEventListener("load", () => {
+        this.width = this.image.naturalWidth;
+        this.height = this.image.naturalHeight;
+
+        this.imageReady = true;
+        resolve();
+      });
+
+      this.image.addEventListener("error", reject);
+
+      this.image.setAttribute("src", this.imagePath);
     });
-
-    this.image.setAttribute("src", this.imagePath);
   }
 }

@@ -15,6 +15,7 @@ export interface IRoomOptions {
   currentActorId: string;
   currentVerb: IVerb;
   walkableArea: IPoint[];
+  yMinScale?: number;
 }
 
 export interface IRoom extends IRenderable {
@@ -26,6 +27,7 @@ export interface IRoom extends IRenderable {
   currentActor: IActor;
   currentVerb: IVerb;
   walkableArea: IPoint[];
+  yMinScale: number;
 
   registerItem(item: IItem): void;
   registerActor(actor: IActor): void;

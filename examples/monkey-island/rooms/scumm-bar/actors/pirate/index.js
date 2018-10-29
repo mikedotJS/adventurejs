@@ -1,12 +1,10 @@
 import imagePath from "./image.gif";
 
 export const pirateActor = {
-  x: 380,
-  y: 270,
+  x: 530,
+  y: 645,
   id: "pirate",
   name: "Pirate",
   imagePath,
-  width: 202,
-  height: 274,
   inventory: []
 };

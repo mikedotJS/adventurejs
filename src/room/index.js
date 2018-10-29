@@ -17,6 +17,7 @@ export class Room extends Renderable implements IRoom {
   currentActor: IActor;
   currentVerb: IVerb;
   walkableArea: IPoint[];
+  yMinScale: number;
 
   constructor(options: IRoomOptions) {
     super({
@@ -33,6 +34,7 @@ export class Room extends Renderable implements IRoom {
     this.actors = new Map();
     this.currentVerb = options.currentVerb;
     this.walkableArea = options.walkableArea;
+    this.yMinScale = options.yMinScale || 1;
 
     options.items.forEach(item => this.registerItem(item));
     options.actors.forEach(actor => this.registerActor(actor));
@@ -58,8 +60,8 @@ export class Room extends Renderable implements IRoom {
     this.actors.set(options.id, new Actor(options));
   }
 
-  init(): void {
-    super.init();
+  async init(): Promise<void> {
+    await super.init();
 
     // Sort actors by Y values
     this.actors = new Map(
@@ -67,8 +69,8 @@ export class Room extends Renderable implements IRoom {
     );
 
     // Init actors
-    this.actors.forEach(actor => {
-      actor.init();
-    });
+    await Promise.all(
+      Array.from(this.actors.values()).map((actor: IActor) => actor.init(this))
+    );
   }
 }
