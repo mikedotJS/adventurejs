@@ -1,10 +1,10 @@
 import imagePath from "./image.gif";
 
-export const pirateActor = {
-  x: 380,
-  y: 270,
-  id: "pirate",
-  name: "Pirate",
+export const thiefActor = {
+  x: 500,
+  y: 340,
+  id: "thief",
+  name: "Thief",
   imagePath,
   width: 202,
   height: 274,

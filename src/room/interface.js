@@ -29,4 +29,5 @@ export interface IRoom extends IRenderable {
 
   registerItem(item: IItem): void;
   registerActor(actor: IActor): void;
+  init(): void;
 }
