@@ -3,6 +3,7 @@ import type { IVerb } from "../verb/interface";
 import type { IActor } from "../actor/interface";
 import type { IItem } from "../item/interface";
 import type { IPoint } from "../point/interface";
+import type { IMoveGraph } from "../move-graph/interface";
 
 export interface IRoomOptions {
   id: string;
@@ -28,6 +29,7 @@ export interface IRoom extends IRenderable {
   currentVerb: IVerb;
   walkableArea: IPoint[];
   yMinScale: number;
+  moveGraph: IMoveGraph;
 
   registerItem(item: IItem): void;
   registerActor(actor: IActor): void;

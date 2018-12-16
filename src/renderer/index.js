@@ -5,8 +5,10 @@ import type { IAdventure } from "../adventure/interface";
 import type { IDebugger } from "../debugger/interface";
 import type { IRenderable } from "../renderable/interface";
 import type { IActor } from "../actor/interface";
+import type { IPoint } from "../point/interface";
 
 import { Debugger } from "../debugger";
+import { Point } from "../point";
 
 export class Renderer implements IRenderer {
   static instance: IRenderer;
@@ -19,7 +21,11 @@ export class Renderer implements IRenderer {
 
   fps: number;
   mainLoopId: IntervalID;
+  mousePosition: IPoint;
+
   onKeyDownListener: (event: KeyboardEvent) => void;
+  onMouseMoveListener: (event: MouseEvent) => void;
+  onClickListener: (event: MouseEvent) => void;
 
   constructor(adventure: IAdventure, fps: number) {
     if (Renderer.instance) {
@@ -41,14 +47,22 @@ export class Renderer implements IRenderer {
     }
 
     this.fps = fps;
+    this.mousePosition = new Point(-1, -1);
     this.mainLoopId = this.start();
 
     this.onKeyDownListener = this.onKeyDown.bind(this);
+    this.onMouseMoveListener = this.onMouseMove.bind(this);
+    this.onClickListener = this.onClick.bind(this);
+
     window.addEventListener("keydown", this.onKeyDownListener);
+    this.canvas.addEventListener("mousemove", this.onMouseMoveListener);
+    this.canvas.addEventListener("click", this.onClickListener);
   }
 
   clear(): void {
     window.removeEventListener("keydown", this.onKeyDownListener);
+    this.canvas.removeEventListener("mousemove", this.onMouseMoveListener);
+    this.canvas.removeEventListener("click", this.onClickListener);
     this.debugger.clear(this.canvas);
 
     if (this.mainLoopId) {
@@ -114,7 +128,7 @@ export class Renderer implements IRenderer {
       case "F4":
         this.debugger.toggleWalkableArea();
         break;
-      case "F5":
+      case "F6":
         this.debugger.toggleActorDetails();
         break;
       case "d":
@@ -123,8 +137,33 @@ export class Renderer implements IRenderer {
       case "c":
         this.debugger.clearManuallyAddedPoints();
         break;
+      case "F7":
+        this.debugger.toggleMoveGraph();
+        break;
       default:
         break;
+    }
+  }
+
+  onMouseMove(event: MouseEvent): void {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    this.mousePosition = new Point(x, y);
+
+    if (this.adventure.currentRoom && this.adventure.currentRoom.currentActor) {
+      this.adventure.currentRoom.moveGraph.updateMousePath(this.mousePosition);
+    }
+  }
+
+  onClick(event: MouseEvent): void {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const point = new Point(x, y);
+
+    if (this.adventure.debug) {
+      this.debugger.onClick(point);
     }
   }
 }

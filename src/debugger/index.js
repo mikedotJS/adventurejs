@@ -11,6 +11,7 @@ import { Point } from "../point";
 export class Debugger implements IDebugger {
   static WALKABLE_AREA_COLOR = "red";
   static ACTOR_COLOR = "yellow";
+  static PATH_COLOR = "blue";
 
   adventure: IAdventure;
   renderer: IRenderer;
@@ -18,14 +19,9 @@ export class Debugger implements IDebugger {
   lastRenderAt: number;
   currentFps: number;
 
-  onMouseMoveListener: (event: MouseEvent) => void;
-  onClickListener: (event: MouseEvent) => void;
-
-  mouseX: number;
-  mouseY: number;
-
   displayWalkableArea: boolean;
   displayActorsDetails: boolean;
+  displayMoveGraph: boolean;
 
   manuallyAddedPoints: IPoint[];
 
@@ -38,27 +34,12 @@ export class Debugger implements IDebugger {
 
     if (this.adventure.debug) {
       this.init();
-    } else {
-      this.clear(this.renderer.canvas);
     }
   }
 
   init(): void {
     this.renderer = this.adventure.renderer;
-    const { canvas } = this.renderer;
-
-    this.onMouseMoveListener = this.onMouseMove.bind(this);
-    this.onClickListener = this.onClick.bind(this);
-
     this.manuallyAddedPoints = [];
-
-    canvas.addEventListener("mousemove", this.onMouseMoveListener);
-    canvas.addEventListener("click", this.onClickListener);
-  }
-
-  clear(canvas: HTMLCanvasElement): void {
-    canvas.removeEventListener("mousemove", this.onMouseMoveListener);
-    canvas.removeEventListener("click", this.onClickListener);
   }
 
   update(): void {
@@ -76,6 +57,12 @@ export class Debugger implements IDebugger {
   toggleActorDetails(): void {
     if (this.adventure.debug) {
       this.displayActorsDetails = !this.displayActorsDetails;
+    }
+  }
+
+  toggleMoveGraph(): void {
+    if (this.adventure.debug) {
+      this.displayMoveGraph = !this.displayMoveGraph;
     }
   }
 
@@ -98,6 +85,14 @@ export class Debugger implements IDebugger {
       this.adventure.currentRoom.actors
     ) {
       this.debugActors(Array.from(this.adventure.currentRoom.actors.values()));
+    }
+
+    if (
+      this.displayMoveGraph &&
+      this.adventure.currentRoom &&
+      this.adventure.currentRoom.moveGraph
+    ) {
+      this.debugMoveGraph();
     }
 
     this.drawMessages();
@@ -154,9 +149,21 @@ export class Debugger implements IDebugger {
     });
   }
 
+  debugMoveGraph(): void {
+    const { moveGraph } = this.adventure.currentRoom;
+
+    moveGraph.paths.forEach((path: [IPoint, IPoint]) => {
+      this.drawSegment(path);
+    });
+
+    this.drawSegment(moveGraph.mousePath);
+    this.drawPoint(moveGraph.mousePath[1], Debugger.PATH_COLOR);
+  }
+
   drawMessages(): void {
     this.renderer.context.fillStyle = "white";
     this.renderer.context.font = "16px Arial";
+    const { mousePosition } = this.renderer;
 
     let y = 0;
     const lines = [
@@ -167,12 +174,13 @@ export class Debugger implements IDebugger {
           : "not defined"
       }`,
       `FPS: ${Math.round(this.currentFps)}`,
-      `Mouse position: ${this.mouseX || "?"};${this.mouseY || "?"}`,
+      `Mouse position: ${mousePosition.x};${mousePosition.y}`,
       `Walkable area: ${this.displayWalkableArea ? "ON" : "OFF"} (F4)`,
       `Manually added points: ${
         this.manuallyAddedPoints.length
       } (click to add, "d" to dump, "c" to clear)`,
-      `Actors: ${this.displayActorsDetails ? "ON" : "OFF"} (F5)`
+      `Actors: ${this.displayActorsDetails ? "ON" : "OFF"} (F6)`,
+      `Move graph: ${this.displayMoveGraph ? "ON" : "OFF"} (F7)`
     ];
 
     lines.forEach(line => {
@@ -181,18 +189,8 @@ export class Debugger implements IDebugger {
     });
   }
 
-  onMouseMove(event: MouseEvent): void {
-    const rect = this.renderer.canvas.getBoundingClientRect();
-    this.mouseX = event.clientX - rect.left;
-    this.mouseY = event.clientY - rect.top;
-  }
-
-  onClick(event: MouseEvent): void {
-    const rect = this.renderer.canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    this.manuallyAddedPoints.push(new Point(x, y));
+  onClick(point: IPoint): void {
+    this.manuallyAddedPoints.push(point);
   }
 
   drawPoint(point: IPoint, color: string): void {
@@ -212,5 +210,16 @@ export class Debugger implements IDebugger {
     if (this.adventure.debug) {
       this.manuallyAddedPoints = [];
     }
+  }
+
+  drawSegment([a, b]: [IPoint, IPoint]): void {
+    this.renderer.context.beginPath();
+    this.renderer.context.moveTo(a.x, a.y);
+    this.renderer.context.lineTo(b.x, b.y);
+    this.renderer.context.closePath();
+
+    this.renderer.context.lineWidth = 1;
+    this.renderer.context.strokeStyle = Debugger.PATH_COLOR;
+    this.renderer.context.stroke();
   }
 }

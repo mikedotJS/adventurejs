@@ -5,9 +5,11 @@ import type { IActor, IActorOptions } from "../actor/interface";
 import type { IVerb } from "../verb/interface";
 import type { IItem } from "../item/interface";
 import type { IPoint } from "../point/interface";
+import type { IMoveGraph } from "../move-graph/interface";
 
 import { Renderable } from "../renderable";
 import { Actor } from "../actor";
+import { MoveGraph } from "../move-graph";
 
 export class Room extends Renderable implements IRoom {
   id: string;
@@ -18,6 +20,7 @@ export class Room extends Renderable implements IRoom {
   currentVerb: IVerb;
   walkableArea: IPoint[];
   yMinScale: number;
+  moveGraph: IMoveGraph;
 
   constructor(options: IRoomOptions) {
     super({
@@ -72,5 +75,8 @@ export class Room extends Renderable implements IRoom {
     await Promise.all(
       Array.from(this.actors.values()).map((actor: IActor) => actor.init(this))
     );
+
+    // Move graph
+    this.moveGraph = new MoveGraph(this.walkableArea, this.currentActor);
   }
 }
