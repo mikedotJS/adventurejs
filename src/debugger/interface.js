@@ -12,14 +12,9 @@ export interface IDebugger {
   lastRenderAt: number;
   currentFps: number;
 
-  onMouseMoveListener: (event: MouseEvent) => void;
-  onClickListener: (event: MouseEvent) => void;
-
-  mouseX: number;
-  mouseY: number;
-
   displayWalkableArea: boolean;
   displayActorsDetails: boolean;
+  displayMoveGraph: boolean;
 
   manuallyAddedPoints: IPoint[];
 
@@ -29,12 +24,12 @@ export interface IDebugger {
   update(): void;
   toggleWalkableArea(): void;
   toggleActorDetails(): void;
+  toggleMoveGraph(): void;
   render(): void;
   debugArea(points: IPoint[]): void;
   debugActors(actors: IActor[]): void;
   drawMessages(): void;
-  onMouseMove(event: MouseEvent): void;
-  onClick(event: MouseEvent): void;
+  onClick(point: IPoint): void;
   drawPoint(point: IPoint, color: string): void;
   dumpManuallyAddedPoints(): void;
   clearManuallyAddedPoints(): void;
